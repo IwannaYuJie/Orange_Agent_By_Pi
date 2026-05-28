@@ -957,7 +957,7 @@ select {
 .chat-log {
 	flex-grow: 1;
 	overflow-y: auto;
-	padding: 24px 24px 130px 24px; /* extra bottom padding for floating composer */
+	padding: 24px 24px 200px 24px; /* extra bottom padding so composer never overlaps the last message */
 	display: flex;
 	flex-direction: column;
 	gap: 20px;

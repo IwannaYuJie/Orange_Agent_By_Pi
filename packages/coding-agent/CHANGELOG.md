@@ -44,6 +44,8 @@
 - Changed Pi Web multi-window behavior to label the first WebSocket as `owner` and later sockets as `observer`, making the current single shared RPC session explicit.
 - Changed Pi Web model option ordering to sort providers alphabetically and models by context-window size, and to sync thinking level to `off` when the selected model cannot reason.
 - Changed Pi Web tool-card and system-event rendering to coalesce frequent updates and skip unchanged tool bodies.
+- Changed Pi Web session token/cost display to a wrapping row of pill chips (`tokens` total, `↓` input, `↑` output, `$` cost) so narrow sidebars no longer truncate the figures behind an ellipsis.
+- Changed Pi Web `系统控制` group to expose all five buttons (`认证授权`, `添加模型`, `资源管理`, `压缩历史`, `手动刷新`) directly in a two-column grid, removing the previous `更多操作` second-level `<details>` block that left a large empty area when collapsed. The last button in an odd-count grid spans the full row.
 
 ### Fixed
 
@@ -56,6 +58,7 @@
 - Fixed Pi Web resource enable toggles to remove legacy bare path entries before writing explicit `+path` / `-path` settings.
 - Fixed Pi Web Markdown export path handling to reject absolute paths and traversal outside the active cwd.
 - Fixed Pi Web session fork flow to ask before replacing unsent composer text.
+- Fixed Pi Web chat-log padding-bottom so the floating composer no longer overlaps the last assistant reply on default viewport heights.
 - Fixed `RpcClient` to reject pending requests and consume stdin pipe errors when the child process exits unexpectedly ([#4764](https://github.com/earendil-works/pi/issues/4764)).
 - Fixed managed npm extension updates to avoid package managers installing or resolving pi host packages as peer dependencies ([#4907](https://github.com/earendil-works/pi/issues/4907)).
 - Fixed RPC mode raw stdout writes to retry transient backpressure errors and flush queued protocol output during shutdown ([#4897](https://github.com/earendil-works/pi/issues/4897)).

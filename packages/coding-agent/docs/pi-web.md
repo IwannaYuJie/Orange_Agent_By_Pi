@@ -87,9 +87,9 @@ The sidebar is intentionally short. It only carries session controls and the wor
 - The brand row carries two telemetry pills (message count `✉` and pending queue `⏳`) inline, so no separate telemetry section is needed.
 - The `当前会话` and `系统控制` groups are collapsible. Each has a chevron toggle in its header; the collapsed/expanded state for each group is persisted in `localStorage` under the key `pi-web:sidebar-collapsed` so it survives reloads.
 - The current session header carries a small badge that shows the auto-compaction mode (`自动` / `手动`) — the badge is the same DOM node `#contextMetric` previously rendered as a metric card.
-- The current session card also shows lightweight token and cost totals from `GET /api/session/stats`.
+- The current session card shows lightweight token and cost totals from `GET /api/session/stats` as a wrapping row of pill chips (`tokens` total, `↓` input, `↑` output, `$` cost). When the sidebar is narrow the chips wrap onto a second line instead of being truncated with an ellipsis.
 - Session actions include `历史` for browsing saved sessions and `分支` for choosing an earlier user message to fork from.
-- Low-frequency actions (`压缩历史上下文`, `资源与扩展包管理`, `手动刷新系统`) are nested inside a second-level `<details>` block labelled `更多操作` inside the `系统控制` group, so the default sidebar surface only shows the high-frequency `认证授权` and `添加模型` buttons.
+- The `系统控制` group shows all five buttons (`认证授权`, `添加模型`, `资源管理`, `压缩历史`, `手动刷新`) inline in a two-column grid; the last button spans the full row when the count is odd. The earlier second-level `<details>` `更多操作` group was removed because collapsing it left a large empty area above the working-directory footer.
 - The footer pins the working-directory label with a `切换` shortcut to the directory picker.
 
 ### Top bar
@@ -217,7 +217,7 @@ For ChatGPT Plus/Pro Codex subscription auth, choose provider `openai-codex`, me
 
 ## Skills and Plugins
 
-Pi Web includes a `Resources` panel (`资源与扩展包管理` button on the sidebar's `更多操作` group) for the parts Pi already treats as extensibility resources. The panel is laid out as a tabbed dialog rather than a multi-column dump:
+Pi Web includes a `Resources` panel (`资源管理` button in the sidebar's `系统控制` group) for the parts Pi already treats as extensibility resources. The panel is laid out as a tabbed dialog rather than a multi-column dump:
 
 - A summary row at the top shows four colored count pills that double as tab triggers: `⚡ 技能`, `🧩 扩展`, `📦 扩展包`, `📂 路径配置`. The pill for the active tab fills with the tab's accent color (skills = blue, extensions = green, packages = purple, paths = orange).
 - Switching tabs only re-renders visibility; the underlying `#skillsList`, `#extensionsList`, `#packagesList` containers keep their existing IDs so `app.js` can keep populating them through `renderResourceList()` and `renderPackages()`.
