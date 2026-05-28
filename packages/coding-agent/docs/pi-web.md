@@ -38,27 +38,27 @@ pi-web -- --provider anthropic --model claude-sonnet-4-20250514
 
 Arguments after `--` are forwarded to the internal `pi --mode rpc` process.
 
-## Desktop Launcher
+## macOS 一键启动脚本
 
-This local checkout also has a macOS desktop launcher at:
+仓库内提供一个可双击的 macOS 启动脚本：
 
 ```text
-/Users/penghaoxiang/Desktop/启动 Pi Web 橘猫.command
+scripts/macos/start-orange-agent-web.command
 ```
 
-Double-clicking it starts Pi Web for `/Users/penghaoxiang/Documents/pi agent/pi` and opens `http://127.0.0.1:42173`.
+双击后会启动当前 checkout 的 Orange Agent Web，并打开 `http://127.0.0.1:42173`。如果脚本被复制到桌面，也可以通过 `ORANGE_AGENT_REPO_DIR=/path/to/repo` 指定项目目录；未指定时会优先识别脚本所在仓库，最后回退到 `/Users/penghaoxiang/Documents/pi agent/pi`。
 
-Launcher behavior:
+脚本行为：
 
-- If Pi Web is already responding on port `42173`, it stops the existing server first, then starts a fresh one and opens the page.
-- If `node_modules` is missing, it runs `npm install --ignore-scripts` before startup.
-- In this development checkout, it runs the source entrypoint with `node --import tsx`; if the source entrypoint is unavailable, it falls back to `packages/coding-agent/dist/web/cli.js`.
-- The launcher writes `~/Library/LaunchAgents/me.penghaoxiang.pi-web.orange-cat.plist`, starts Pi Web through `launchctl`, waits until `GET /api/state` responds, opens the browser, then exits. This keeps Pi Web alive after the launcher terminal closes.
-- When launched by macOS Terminal, the launcher also schedules the launcher tab to close after a clean startup.
-- If startup fails or the port is occupied by a non-Pi process, the launcher keeps the terminal window open and prints the relevant status/log output for diagnosis.
-- Logs are appended to `~/Library/Logs/PiWeb/pi-web.log`.
-- Set `PI_WEB_PORT=<port>` before launching from Terminal to use a different local port.
-- Set `PI_WEB_STARTUP_TRIES=<count>` to change how many readiness checks the launcher performs before timing out.
+- 如果 `42173` 端口上已经有 Orange Agent Web 响应，会先停止旧进程，再启动新进程并打开页面。
+- 如果 `node_modules` 不存在，会先执行 `npm install --ignore-scripts`。
+- 在源码 checkout 中会优先用 `node --import tsx packages/coding-agent/src/web/cli.ts` 启动；如果源码入口不存在，则回退到 `packages/coding-agent/dist/web/cli.js`。
+- 脚本会写入 `~/Library/LaunchAgents/me.penghaoxiang.orange-agent-by-pi.plist`，通过 `launchctl` 在后台启动服务，等待 `GET /api/state` 可用后打开浏览器并退出。
+- 从 macOS Terminal 双击启动时，成功后会自动关闭启动脚本所在的 Terminal 标签页。
+- 如果启动失败，或端口被非 Orange Agent Web 进程占用，脚本会保留窗口并打印状态和日志尾部，便于排查。
+- 日志写入 `~/Library/Logs/OrangeAgentByPi/orange-agent-web.log`。
+- 可设置 `ORANGE_AGENT_WEB_PORT=<port>` 或兼容旧变量 `PI_WEB_PORT=<port>` 来换端口。
+- 可设置 `ORANGE_AGENT_WEB_STARTUP_TRIES=<count>` 或兼容旧变量 `PI_WEB_STARTUP_TRIES=<count>` 来调整等待次数。
 
 ## Architecture
 

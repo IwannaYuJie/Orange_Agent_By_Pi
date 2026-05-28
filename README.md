@@ -43,6 +43,14 @@ npm run build
 npm run web
 ```
 
+macOS 也可以直接双击仓库内的一键启动脚本：
+
+```text
+scripts/macos/start-orange-agent-web.command
+```
+
+这个脚本会自动定位当前仓库、必要时执行 `npm install --ignore-scripts`，然后通过 LaunchAgent 在后台启动 Orange Agent Web 并打开浏览器。
+
 如果已经安装或打包 CLI，也可以直接运行：
 
 ```bash
@@ -80,6 +88,7 @@ Web 层只是一个轻量 fork 层：它代理 Pi RPC 能力，不重写上游 a
 
 | 路径 | 说明 |
 | ---- | ---- |
+| `scripts/macos/start-orange-agent-web.command` | macOS 一键启动脚本，可双击启动本地 Web 工作台 |
 | `packages/coding-agent/src/web/` | Orange Agent Web 服务端、RPC 桥、WebSocket 桥、资源管理器和浏览器静态资源 |
 | `packages/coding-agent/docs/pi-web.md` | Web UI、API、认证、会话和资源管理的详细文档 |
 | `packages/coding-agent` | Pi coding-agent CLI，以及新增的 `pi-web` 入口 |
