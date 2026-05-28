@@ -11,6 +11,10 @@ packages/*/dist-firefox/
 
 # Environment
 .env
+.env.*
+auth.json
+*.pem
+*.key
 
 # Editor files
 .vscode/

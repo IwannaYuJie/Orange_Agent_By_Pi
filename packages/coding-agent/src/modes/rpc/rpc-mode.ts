@@ -440,6 +440,7 @@ export async function runRpcMode(runtimeHost: AgentSessionRuntime): Promise<neve
 
 			case "get_state": {
 				const state: RpcSessionState = {
+					cwd: process.cwd(),
 					model: session.model,
 					thinkingLevel: session.thinkingLevel,
 					isStreaming: session.isStreaming,
@@ -461,6 +462,8 @@ export async function runRpcMode(runtimeHost: AgentSessionRuntime): Promise<neve
 			// =================================================================
 
 			case "set_model": {
+				session.modelRegistry.authStorage.reload();
+				session.modelRegistry.refresh();
 				const models = await session.modelRegistry.getAvailable();
 				const model = models.find((m) => m.provider === command.provider && m.id === command.modelId);
 				if (!model) {
@@ -479,6 +482,8 @@ export async function runRpcMode(runtimeHost: AgentSessionRuntime): Promise<neve
 			}
 
 			case "get_available_models": {
+				session.modelRegistry.authStorage.reload();
+				session.modelRegistry.refresh();
 				const models = await session.modelRegistry.getAvailable();
 				return success(id, "get_available_models", { models });
 			}
@@ -660,6 +665,15 @@ export async function runRpcMode(runtimeHost: AgentSessionRuntime): Promise<neve
 				}
 
 				return success(id, "get_commands", { commands });
+			}
+
+			// =================================================================
+			// Resources
+			// =================================================================
+
+			case "reload_resources": {
+				await session.reload();
+				return success(id, "reload_resources");
 			}
 
 			default: {

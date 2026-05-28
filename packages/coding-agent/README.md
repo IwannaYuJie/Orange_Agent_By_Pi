@@ -23,6 +23,8 @@ Pi ships with powerful defaults but skips features like sub agents and plan mode
 
 Pi runs in four modes: interactive, print or JSON, RPC for process integration, and an SDK for embedding in your own apps. See [openclaw/openclaw](https://github.com/openclaw/openclaw) for a real-world SDK integration.
 
+This personal fork also includes `pi-web`, a localhost browser UI backed by RPC mode. It keeps the terminal `pi` entrypoint unchanged while adding a Codex-style local Web surface. See [docs/pi-web.md](docs/pi-web.md).
+
 ## Share your OSS coding agent sessions
 
 If you use pi for open source work, please share your coding agent sessions.
@@ -462,6 +464,18 @@ pi --mode rpc
 ```
 
 RPC mode uses strict LF-delimited JSONL framing. Clients must split records on `\n` only. Do not use generic line readers like Node `readline`, which also split on Unicode separators inside JSON payloads.
+
+### Pi Web
+
+Start the local browser UI:
+
+```bash
+pi-web --open
+```
+
+`pi-web` binds to `127.0.0.1:42173` by default and forwards commands to an internal `pi --mode rpc` child process.
+The Web UI includes provider auth for built-in models and an `Add model` flow for `~/.pi/agent/models.json` custom providers.
+It also includes a `Resources` panel for skills, extensions, Pi packages, and live resource reload.
 
 See [docs/rpc.md](docs/rpc.md) for the protocol.
 

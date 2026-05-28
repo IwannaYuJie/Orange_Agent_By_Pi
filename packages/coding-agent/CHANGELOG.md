@@ -2,8 +2,60 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added `pi-web`, a localhost browser UI backed by Pi RPC mode for personal fork workflows.
+- Added Pi Web provider auth and custom model setup for `auth.json`, OAuth login flows, and `models.json`.
+- Added Pi Web skills, extensions, and package resource management with live RPC resource reload.
+- Added Pi Web prompt attachments for local text files alongside existing image input.
+- Added transparent Pi Web orange-cat artwork for the sidebar mascot and empty conversation state.
+- Added Pi Web working-directory switching through a local RPC child-process restart.
+- Added Pi Web sidebar collapsible groups for `当前会话` and `系统控制`, with each group's collapsed state persisted to `localStorage` under `pi-web:sidebar-collapsed`.
+- Added Pi Web sidebar telemetry pills (message count and pending-queue count) inline with the brand row.
+- Added Pi Web empty-state quick-prompt chips that fill the composer with a stored prompt and immediately send it.
+- Added Pi Web resources panel tabbed layout with colored count pills doubling as tab triggers (`⚡ 技能`, `🧩 扩展`, `📦 扩展包`, `📂 路径配置`).
+- Added Pi Web resources panel color-coded chips on resource items (`chip-on`, `chip-off`, `chip-scope`, `chip-source`, `chip-origin`).
+- Added Pi Web package-install quick-fill chips (`npm:`, `git:github.com/`, local path) that populate the source input with the appropriate prefix.
+- Added Pi Web skills-tab hint that explains the difference between locally creating a skill versus installing a published package, and links to the Packages tab.
+- Added Pi Web saved-session browsing through `GET /api/sessions/list`, including message counts and last-model metadata.
+- Added Pi Web edit/resend actions for user messages and a fork picker backed by RPC `get_fork_messages` / `fork`.
+- Added Pi Web clipboard image paste, recursive folder drop, and attachment chips with thumbnails, file sizes, and line counts.
+- Added Pi Web PDF prompt attachments using base64 file payloads with MIME and encoding metadata.
+- Added Pi Web slash-command autocomplete in the composer from `GET /api/commands`.
+- Added Pi Web specialized tool cards for `read`, `edit`, `bash`, and `grep`, plus richer Markdown tables, links, blockquotes, checkboxes, and code-block controls.
+- Added Pi Web model search with provider grouping, context-window/image/thinking metadata, and thinking-level disablement for non-reasoning models.
+- Added Pi Web resource diagnostics, skill/extension preview, and top-level resource enable/disable actions.
+- Added Pi Web token/cost stats display, recent working-directory chips, bash history recall, and exponential WebSocket reconnect backoff.
+- Added Pi Web Markdown export for full sessions and selected chat ranges through `POST /api/export/markdown`.
+- Added Pi Web thinking-block elapsed-time metadata, shorter redacted/encrypted badges with tooltips, and animation-frame coalescing for assistant stream renders.
+- Added Pi Web bash-panel SIGINT support through `POST /api/bash/abort` and lightweight ANSI foreground-color rendering.
+- Added Pi Web saved-session cwd filtering from the recent-cwd list and a visible observer warning badge for shared-RPC browser windows.
+
+### Changed
+
+- Changed the Pi Web bottom terminal and system event drawer to start collapsed by default.
+- Changed Pi Web working-directory switching to use a directory picker modal instead of a manual path prompt.
+- Changed Pi Web sidebar to a compact single-screen layout: removed the redundant mascot block (mascot remains in the chat empty state), shrunk brand and section spacing, and nested low-frequency actions (`压缩历史上下文`, `资源与扩展包管理`, `手动刷新系统`) under a second-level `<details>` `更多操作` block.
+- Changed Pi Web top bar to drop the redundant `智能体工作区` title and to render the execute/plan toggle with icons and one-word labels.
+- Changed Pi Web empty state to a smaller illustration and shorter copy so the composer occupies more of the viewport on first load.
+- Changed Pi Web composer upload button to icon-only with a tooltip, and recolored attachment chips to match the orange theme.
+- Changed Pi Web resources panel from a three-column grid with three stacked forms to a tabbed dialog where each tab owns its corresponding action form (create-skill, install-package, configure-path). Resource items now show a single-line truncated path with a full-path tooltip and a two-line clamped description.
+- Changed Pi Web resource mutation endpoints to call RPC `reload_resources` immediately after updating skills, paths, packages, or enabled-state settings.
+- Changed Pi Web multi-window behavior to label the first WebSocket as `owner` and later sockets as `observer`, making the current single shared RPC session explicit.
+- Changed Pi Web model option ordering to sort providers alphabetically and models by context-window size, and to sync thinking level to `off` when the selected model cannot reason.
+- Changed Pi Web tool-card and system-event rendering to coalesce frequent updates and skip unchanged tool bodies.
+
 ### Fixed
 
+- Fixed Pi Web to keep assistant thinking blocks visible as collapsed rows even when the provider only returns encrypted reasoning data without a plain-text summary.
+- Fixed Pi Web prompt submission to render user chat bubbles from RPC events only, avoiding duplicate user messages while the agent is running.
+- Fixed Pi Web's working-directory footer to show the actual agent cwd instead of the selected model id.
+- Fixed Pi Web asset copying so nested browser artwork directories are included in built output.
+- Fixed Pi Web bash panel output handling to read the RPC `output` field and show command exit/cancel status.
+- Fixed Pi Web grep tool cards to escape matched source snippets as raw code instead of parsing them as Markdown.
+- Fixed Pi Web resource enable toggles to remove legacy bare path entries before writing explicit `+path` / `-path` settings.
+- Fixed Pi Web Markdown export path handling to reject absolute paths and traversal outside the active cwd.
+- Fixed Pi Web session fork flow to ask before replacing unsent composer text.
 - Fixed `RpcClient` to reject pending requests and consume stdin pipe errors when the child process exits unexpectedly ([#4764](https://github.com/earendil-works/pi/issues/4764)).
 - Fixed managed npm extension updates to avoid package managers installing or resolving pi host packages as peer dependencies ([#4907](https://github.com/earendil-works/pi/issues/4907)).
 - Fixed RPC mode raw stdout writes to retry transient backpressure errors and flush queued protocol output during shutdown ([#4897](https://github.com/earendil-works/pi/issues/4897)).

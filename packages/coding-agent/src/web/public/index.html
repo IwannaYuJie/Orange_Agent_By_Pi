@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Pi Web | AI 编程智能体工作区</title>
+
+		<!-- Google Fonts 字体配置 -->
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+		<link rel="stylesheet" href="/styles.css" />
+	</head>
+	<body>
+		<div class="app-shell" id="appShell">
+
+			<!-- 左侧边栏：会话管理、系统遥测与资源配置 -->
+			<aside class="sidebar left-panel" id="leftPanel">
+				<div class="brand">
+					<div class="brand-mark" title="Pi Web 橘猫">🐾</div>
+					<div class="brand-info">
+						<h1>Pi Web 橘猫</h1>
+					</div>
+					<!-- 紧凑遥测：消息数 / 待处理 直接挂在品牌行上，省一整块空间 -->
+					<div class="brand-telemetry" title="消息数 / 待处理">
+						<span class="telemetry-pill" title="消息数"><span class="telemetry-icon">✉</span><strong id="messageMetric">0</strong></span>
+						<span class="telemetry-pill" title="待处理队列"><span class="telemetry-icon">⏳</span><strong id="queueMetric">0</strong></span>
+					</div>
+				</div>
+
+				<!-- 会话管理 (可折叠) -->
+				<div class="panel-section" data-section="session">
+					<button class="section-toggle" type="button" data-target="session" aria-expanded="true">
+						<svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+						<span class="section-title">当前会话</span>
+						<span class="section-badge" id="contextMetric" title="上下文压缩模式">自动</span>
+					</button>
+					<div class="section-body">
+						<div class="session-card">
+							<div class="session-header-row">
+								<svg class="section-icon text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+								<div id="sessionName" class="session-name editable-name" title="双击重命名会话">
+									<span>当前会话</span>
+									<svg class="inline-edit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+								</div>
+							</div>
+							<div id="sessionFile" class="muted small truncate-path" title="暂无会话文件">暂无会话文件</div>
+							<div id="sessionStats" class="session-stats">
+								<span class="stat-chip stat-tokens" title="本会话累计 tokens 总数"><strong>0</strong> tokens</span>
+								<span class="stat-chip stat-in" title="输入 tokens">↓ 0</span>
+								<span class="stat-chip stat-out" title="输出 tokens">↑ 0</span>
+								<span class="stat-chip stat-cost" title="估算成本">$0.0000</span>
+							</div>
+						</div>
+						<div class="button-grid">
+							<button id="newSessionBtn" class="btn btn-secondary btn-sm">
+								<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+								<span>新建</span>
+							</button>
+							<button id="sessionsBtn" class="btn btn-secondary btn-sm">
+								<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"></path></svg>
+								<span>历史</span>
+							</button>
+							<button id="exportBtn" class="btn btn-secondary btn-sm">
+								<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+								<span>导出</span>
+							</button>
+							<button id="forkBtn" class="btn btn-secondary btn-sm">
+								<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v12"></path><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
+								<span>分支</span>
+							</button>
+						</div>
+
+						<!-- 隐藏的旧表单，保持 DOM 节点 ID 兼容 -->
+						<div class="inline-form hidden">
+							<input id="sessionNameInput" placeholder="重命名会话..." />
+							<button id="renameBtn" class="btn btn-secondary btn-icon-only">确定</button>
+						</div>
+					</div>
+				</div>
+
+				<!-- 系统控制 (可折叠) -->
+				<div class="panel-section" data-section="controls">
+					<button class="section-toggle" type="button" data-target="controls" aria-expanded="true">
+						<svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+						<span class="section-title">系统控制</span>
+					</button>
+					<div class="section-body">
+						<div class="button-grid">
+							<button id="authBtn" class="btn btn-secondary btn-sm">认证授权</button>
+							<button id="addModelBtn" class="btn btn-secondary btn-sm">添加模型</button>
+							<button id="resourcesBtn" class="btn btn-secondary btn-sm">资源管理</button>
+							<button id="compactBtn" class="btn btn-secondary btn-sm">压缩历史</button>
+							<button id="refreshBtn" class="btn btn-secondary btn-sm">手动刷新</button>
+						</div>
+					</div>
+				</div>
+
+				<!-- 侧边栏底部工作路径 -->
+				<div class="sidebar-footer">
+					<div class="sidebar-footer-heading">
+						<span class="section-title">工作目录</span>
+						<button id="cwdChangeBtn" class="footer-link-btn" type="button">切换</button>
+					</div>
+					<p id="cwdLabel" class="truncate-path" title="工作区路径">Loading...</p>
+				</div>
+			</aside>
+
+			<!-- 中间主视图：对话区与输入框 -->
+			<main class="chat-pane" id="chatPane">
+				<header class="topbar">
+					<div class="topbar-status">
+						<button id="toggleLeftBtn" class="btn btn-secondary btn-icon-only toggle-sidebar-btn" title="显示/隐藏左边栏">
+							<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+						</button>
+						<div id="connectionLabel" class="status-pill state-connecting" title="连接状态">连接中...</div>
+						<div id="observerWarning" class="observer-warning hidden" title="此窗口共享同一个 RPC 会话，操作会影响 owner 窗口">observer</div>
+					</div>
+
+					<!-- Model Selectors (放置于顶部栏，高度集成，界面更加清爽) -->
+					<div class="topbar-model-controls">
+						<input id="modelSearchInput" class="model-search-input" placeholder="搜索模型..." autocomplete="off" />
+						<div class="custom-select-wrapper model-select-wrapper">
+							<select id="modelSelect"></select>
+						</div>
+						<div class="custom-select-wrapper thinking-select-wrapper">
+							<select id="thinkingSelect">
+								<option value="off">关闭深度思考</option>
+								<option value="minimal">深度思考: 最低 (minimal)</option>
+								<option value="low">深度思考: 较低 (low)</option>
+								<option value="medium">深度思考: 中等 (medium)</option>
+								<option value="high">深度思考: 较高 (high)</option>
+								<option value="xhigh">深度思考: 最高 (xhigh)</option>
+							</select>
+						</div>
+					</div>
+
+					<div class="topbar-actions">
+						<div class="mode-toggle" role="group" aria-label="提示模式">
+							<button id="executeModeBtn" class="mode active" title="直接执行：智能体可以立即修改文件">
+								<svg class="mode-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+								<span>执行</span>
+							</button>
+							<button id="planModeBtn" class="mode" title="先制定计划：仅规划，等确认后再动手">
+								<svg class="mode-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+								<span>计划</span>
+							</button>
+						</div>
+						<!-- 终端抽屉切换按钮 -->
+						<button id="toggleRightBtn" class="btn btn-secondary btn-icon-only toggle-sidebar-btn" title="显示/隐藏终端抽屉">
+							<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="15" x2="21" y2="15"></line></svg>
+						</button>
+					</div>
+				</header>
+
+				<!-- 滚动聊天区 -->
+				<section id="chatLog" class="chat-log" aria-live="polite">
+					<div class="empty-state">
+						<img class="empty-illustration" src="/assets/mikan-empty-state.png" alt="正在待命的橘猫助手" width="160" height="106" />
+						<div class="empty-title">随时可以开始</div>
+						<p>提问、写代码、跑命令，或者让 Pi 帮你规划本地代码库的大型重构。</p>
+						<div class="quick-prompts" role="group" aria-label="快捷提示">
+							<button class="quick-prompt" type="button" data-prompt="请分析当前项目的目录结构，告诉我这是个什么类型的项目，主要模块有哪些。">
+								<span class="qp-icon">📁</span><span>分析项目结构</span>
+							</button>
+							<button class="quick-prompt" type="button" data-prompt="请阅读 README 和入口文件，给我一个 5 分钟上手指南。">
+								<span class="qp-icon">📖</span><span>5 分钟上手</span>
+							</button>
+							<button class="quick-prompt" type="button" data-prompt="请扫描代码库，找出最近改动较频繁、复杂度较高、或者明显能重构的几个文件。">
+								<span class="qp-icon">🔍</span><span>找重构目标</span>
+							</button>
+							<button class="quick-prompt" type="button" data-prompt="请审计依赖与配置文件，看是否有过时、未使用或潜在安全风险的项。">
+								<span class="qp-icon">🛡</span><span>依赖审计</span>
+							</button>
+						</div>
+					</div>
+				</section>
+
+				<!-- 悬浮返回底部指示器 -->
+				<div id="scrollBottomBadge" class="scroll-bottom-badge hidden">
+					<span>↓ 智能体正在输入...</span>
+				</div>
+
+				<!-- 对话输入区 (Codex-style 内嵌式输入面板) -->
+				<footer class="composer">
+					<div id="slashCommandMenu" class="slash-menu hidden" role="listbox"></div>
+					<div id="attachmentPreview" class="attachment-preview"></div>
+					<div class="textarea-wrapper">
+						<textarea id="promptInput" placeholder="向 Pi 发送指令...   Enter 发送 · Shift+Enter 换行" rows="2"></textarea>
+						<div class="composer-actions">
+							<label class="file-button btn btn-secondary btn-icon-only" title="附加文件或图片">
+								<input id="attachmentInput" type="file" multiple accept="image/png,image/jpeg,image/gif,image/webp,text/*,.txt,.md,.json,.yaml,.yml,.toml,.xml,.csv,.tsv,.pdf,application/pdf" />
+								<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05 12 20.49a6 6 0 0 1-8.49-8.49l9.44-9.44a4 4 0 0 1 5.66 5.66L9.17 17.66a2 2 0 0 1-2.83-2.83l8.49-8.49"></path></svg>
+							</label>
+							<div class="composer-main-buttons">
+								<button id="stopBtn" class="btn btn-danger hidden" title="停止当前生成">
+									<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+									<span>停止</span>
+								</button>
+								<button id="sendBtn" class="btn btn-primary" title="发送 (Enter)">
+									<span>发送</span>
+									<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+								</button>
+							</div>
+						</div>
+					</div>
+				</footer>
+			</main>
+
+			<!-- 底部抽屉：复古游戏终端与系统日志 (原本是 rightPanel 侧边栏，现合并平铺至底部以扩展聊天宽度) -->
+			<aside class="sidebar right-panel collapsed" id="rightPanel">
+
+				<!-- 本地终端 -->
+				<div class="panel-section terminal-section">
+					<div class="mock-terminal">
+						<div class="terminal-header">
+							<div class="terminal-dots">
+								<span class="dot-red"></span>
+								<span class="dot-yellow"></span>
+								<span class="dot-green"></span>
+							</div>
+							<span class="terminal-title">zsh console</span>
+							<button id="clearTerminalBtn" class="clear-terminal-btn" title="清空控制台历史">
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+							</button>
+						</div>
+
+						<div id="terminalHistory" class="terminal-history">
+							<div class="terminal-output-line text-muted">终端已就绪。输入本地命令以在此执行。</div>
+						</div>
+
+						<div class="terminal-input-row">
+							<span class="terminal-prompt">$</span>
+							<input id="bashInput" placeholder="输入命令..." autocomplete="off" />
+							<button id="bashAbortBtn" class="terminal-abort-btn" type="button" disabled title="中断当前命令">SIGINT</button>
+						</div>
+
+						<!-- 隐藏的旧按钮，保持 DOM 节点 ID 兼容 -->
+						<div class="terminal-action-row hidden">
+							<button id="bashBtn">运行</button>
+						</div>
+					</div>
+				</div>
+
+				<!-- WebSocket 日志 -->
+				<div class="panel-section events-section">
+					<div class="section-title-row">
+						<div class="section-title">系统事件流</div>
+						<div id="toolList" class="tool-list">
+							<span>read</span><span>bash</span><span>edit</span><span>write</span>
+						</div>
+						<div id="eventFilters" class="event-filters">
+							<button class="filter-tab active" data-filter="all">全部</button>
+							<button class="filter-tab" data-filter="agent">智能体</button>
+							<button class="filter-tab" data-filter="tool">工具</button>
+							<button class="filter-tab" data-filter="error">错误</button>
+						</div>
+					</div>
+					<div id="eventList" class="event-list"></div>
+				</div>
+			</aside>
+		</div>
+
+		<!-- UI 弹窗子系统 -->
+
+		<!-- 确认弹窗 -->
+		<div id="modalBackdrop" class="modal-backdrop hidden">
+			<div class="modal modal-animation">
+				<div class="modal-header">
+					<svg class="modal-header-icon text-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+					<h3 id="modalTitle">安全确认</h3>
+				</div>
+				<div class="modal-content">
+					<p id="modalMessage"></p>
+					<div id="modalOptions" class="modal-options"></div>
+				</div>
+				<div class="modal-actions">
+					<button id="modalCancel" class="btn btn-secondary">拒绝</button>
+					<button id="modalConfirm" class="btn btn-primary">允许操作</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- 认证授权管理 -->
+		<div id="authModalBackdrop" class="modal-backdrop hidden">
+			<div class="modal config-modal modal-animation">
+				<div class="modal-header">
+					<svg class="modal-header-icon text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+					<h3>大模型服务商认证授权</h3>
+				</div>
+				<div class="modal-content">
+					<div class="form-grid">
+						<label>
+							<span>服务商 (Provider)</span>
+							<div class="custom-select-wrapper">
+								<select id="authProviderSelect"></select>
+							</div>
+						</label>
+						<label>
+							<span>认证方式</span>
+							<div class="custom-select-wrapper">
+								<select id="authMethodSelect">
+									<option value="api_key">API 密钥 (API Key)</option>
+									<option value="oauth">OAuth 授权登录</option>
+								</select>
+							</div>
+						</label>
+						<label id="apiKeyField" class="full-span">
+							<span>API 密钥或配置获取命令</span>
+							<input id="authApiKeyInput" type="password" autocomplete="off" placeholder="请输入 sk-... 或 环境变量名" />
+						</label>
+					</div>
+					<div id="oauthPanel" class="oauth-panel hidden">
+						<div class="oauth-instructions-box">
+							<a id="oauthLink" class="oauth-link hidden" target="_blank" rel="noreferrer">打开浏览器登录</a>
+							<div id="oauthStatus" class="oauth-status-text small">准备进行授权。</div>
+						</div>
+						<div id="oauthPromptGroup" class="inline-form hidden">
+							<div class="input-wrapper">
+								<input id="oauthPromptInput" placeholder="输入回调授权码或 redirect 链接..." />
+							</div>
+							<button id="oauthPromptSubmit" class="btn btn-secondary">提交</button>
+						</div>
+					</div>
+				</div>
+				<div class="modal-actions">
+					<button id="authCancel" class="btn btn-secondary">关闭</button>
+					<button id="authLogout" class="btn btn-danger">清除配置/登出</button>
+					<button id="authSave" class="btn btn-primary">保存密钥</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- 添加自定义模型 -->
+		<div id="modelModalBackdrop" class="modal-backdrop hidden">
+			<div class="modal config-modal modal-animation">
+				<div class="modal-header">
+					<svg class="modal-header-icon text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+					<h3>添加自定义本地/API 模型</h3>
+				</div>
+				<div class="modal-content overflow-form">
+					<div class="form-grid">
+						<label>
+							<span>服务商 ID (Provider ID)</span>
+							<input id="customProviderInput" placeholder="例如: ollama" />
+						</label>
+						<label>
+							<span>模型 ID (Model ID)</span>
+							<input id="customModelInput" placeholder="例如: qwen2.5-coder:7b" />
+						</label>
+						<label>
+							<span>友好显示名称</span>
+							<input id="customNameInput" placeholder="例如: Qwen Coder 本地版" />
+						</label>
+						<label>
+							<span>接口标准 (API)</span>
+							<div class="custom-select-wrapper">
+								<select id="customApiSelect">
+									<option value="openai-completions">OpenAI Chat Completions</option>
+									<option value="openai-responses">OpenAI Responses</option>
+									<option value="anthropic-messages">Anthropic Messages</option>
+									<option value="google-generative-ai">Google Generative AI</option>
+								</select>
+							</div>
+						</label>
+						<label>
+							<span>API 基础地址 (Base URL)</span>
+							<input id="customBaseUrlInput" placeholder="例如: http://localhost:11434/v1" />
+						</label>
+						<label>
+							<span>API 密钥或 Env 变量</span>
+							<input id="customApiKeyInput" type="password" autocomplete="off" placeholder="本地模型通常输入 ollama 或留空" />
+						</label>
+						<label>
+							<span>上下文大小 (Context)</span>
+							<input id="customContextInput" type="number" min="1" value="128000" />
+						</label>
+						<label>
+							<span>单次最大生成 Token 数</span>
+							<input id="customMaxTokensInput" type="number" min="1" value="16384" />
+						</label>
+					</div>
+					<div class="checkbox-row-container">
+						<span class="checkbox-group-title">模型支持能力</span>
+						<div class="checkbox-row">
+							<label class="checkbox-chip">
+								<input id="customImageInput" type="checkbox" />
+								<span>支持图片输入</span>
+							</label>
+							<label class="checkbox-chip">
+								<input id="customReasoningInput" type="checkbox" />
+								<span>支持深度思考推理</span>
+							</label>
+							<label class="checkbox-chip">
+								<input id="customLocalCompatInput" type="checkbox" checked />
+								<span>本地兼容模式</span>
+							</label>
+						</div>
+					</div>
+					<div id="customModelStatus" class="modal-status-msg small"></div>
+				</div>
+				<div class="modal-actions">
+					<button id="modelCancel" class="btn btn-secondary">关闭</button>
+					<button id="modelSave" class="btn btn-primary">保存并立即使用</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- 资源与扩展包管理 -->
+		<div id="resourcesModalBackdrop" class="modal-backdrop hidden">
+			<div class="modal resources-modal modal-animation">
+				<div class="modal-header">
+					<svg class="modal-header-icon text-accent-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+					<h3>技能与系统扩展包管理</h3>
+				</div>
+
+				<!-- 顶部摘要：彩色计数胶囊（也是 tab 入口） + 重载 + 状态文字 -->
+				<div class="resource-summary-bar">
+					<div class="resource-count-tabs" role="tablist" aria-label="资源类型">
+						<button class="rc-pill color-skills active" role="tab" data-tab="skills" type="button" aria-selected="true">
+							<span class="rc-icon">⚡</span><span class="rc-label">技能</span><strong id="skillCountBadge" class="rc-count">0</strong>
+						</button>
+						<button class="rc-pill color-extensions" role="tab" data-tab="extensions" type="button" aria-selected="false">
+							<span class="rc-icon">🧩</span><span class="rc-label">扩展</span><strong id="extensionCountBadge" class="rc-count">0</strong>
+						</button>
+						<button class="rc-pill color-packages" role="tab" data-tab="packages" type="button" aria-selected="false">
+							<span class="rc-icon">📦</span><span class="rc-label">扩展包</span><strong id="packageCountBadge" class="rc-count">0</strong>
+						</button>
+						<button class="rc-pill color-paths" role="tab" data-tab="paths" type="button" aria-selected="false">
+							<span class="rc-icon">📂</span><span class="rc-label">路径配置</span>
+						</button>
+					</div>
+					<div class="resource-summary-meta">
+						<span id="resourcesStatus" class="resource-status-text small" aria-live="polite"></span>
+						<button id="resourcesReloadBtn" class="btn btn-secondary mini-action" type="button" title="重新扫描磁盘获取最新资源">
+							<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+							<span>重新加载</span>
+						</button>
+					</div>
+				</div>
+
+				<!-- Tab 内容区 -->
+				<div class="resource-panel-wrap">
+					<!-- 技能 Tab -->
+					<section class="resource-panel active" data-panel="skills" role="tabpanel">
+						<div id="resourceDiagnostics" class="resource-diagnostics hidden"></div>
+						<div class="panel-hint subtle">
+							<svg class="hint-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+							<span>下方表单是<strong>本地手动新建</strong>一个技能；如果想用 <code>npm:</code> / <code>git:</code> 或本地路径 <strong>安装现成包</strong>，请去 <button class="text-link" type="button" data-jump-tab="packages">扩展包</button> 标签页。</span>
+						</div>
+						<div id="skillsList" class="resource-list"></div>
+						<details class="action-block" open>
+							<summary>
+								<svg class="summary-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+								<span>新建自定义技能</span>
+							</summary>
+							<div class="action-form">
+								<div class="form-grid">
+									<label>
+										<span>技能名称</span>
+										<input id="skillNameInput" placeholder="例如: my-refactoring-skill" />
+									</label>
+									<label>
+										<span>作用域范围</span>
+										<div class="custom-select-wrapper">
+											<select id="resourceScopeSelect">
+												<option value="user">全局共享 (User)</option>
+												<option value="project">当前项目 (Project)</option>
+											</select>
+										</div>
+									</label>
+									<label class="full-span">
+										<span>技能简介描述</span>
+										<input id="skillDescriptionInput" placeholder="简要描述技能作用，方便 AI 在合适的时候调用" />
+									</label>
+									<label class="full-span">
+										<span>系统指令及工作流约束</span>
+										<textarea id="skillInstructionsInput" rows="3" placeholder="详细输入 AI 调用该技能时需要遵守的指示、约束条件或流程步骤..."></textarea>
+									</label>
+								</div>
+								<div class="button-row">
+									<button id="skillCreateBtn" class="btn btn-primary">
+										<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+										<span>创建技能</span>
+									</button>
+								</div>
+							</div>
+						</details>
+					</section>
+
+					<!-- 扩展 Tab -->
+					<section class="resource-panel" data-panel="extensions" role="tabpanel" hidden>
+						<div id="extensionsList" class="resource-list"></div>
+						<div class="panel-hint">
+							<svg class="hint-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+							<span>扩展由系统自动从配置目录中发现。如需添加新扩展，请前往 <button class="text-link" type="button" data-jump-tab="paths">路径配置</button> 添加搜索目录。</span>
+						</div>
+					</section>
+
+					<!-- 扩展包 Tab -->
+					<section class="resource-panel" data-panel="packages" role="tabpanel" hidden>
+						<div id="packagesList" class="resource-list"></div>
+						<details class="action-block" open>
+							<summary>
+								<svg class="summary-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+								<span>安装新扩展包</span>
+							</summary>
+							<div class="action-form">
+								<p class="action-form-hint">输入包来源即可安装包内打包好的 skills/extensions/prompts/themes。</p>
+								<div class="form-grid">
+									<label class="full-span">
+										<span>包来源标识 (Source)</span>
+										<input id="packageSourceInput" placeholder="例如：npm:@foo/bar@1.0.0  ·  git:github.com/user/repo@v1  ·  /path/to/local-folder" />
+									</label>
+								</div>
+								<div class="install-examples">
+									<span class="install-examples-label">快速试用：</span>
+									<button type="button" class="install-example-chip" data-fill="npm:">
+										<code>npm:</code>
+									</button>
+									<button type="button" class="install-example-chip" data-fill="git:github.com/">
+										<code>git:github.com/</code>
+									</button>
+									<button type="button" class="install-example-chip" data-fill="/">
+										<code>本地路径</code>
+									</button>
+								</div>
+								<div class="button-row">
+									<button id="packageInstallBtn" class="btn btn-primary">
+										<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+										<span>安装扩展包</span>
+									</button>
+								</div>
+							</div>
+						</details>
+					</section>
+
+					<!-- 路径配置 Tab -->
+					<section class="resource-panel" data-panel="paths" role="tabpanel" hidden>
+						<div class="panel-hint">
+							<svg class="hint-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+							<span>添加额外的目录，让 Pi 在这些位置查找扩展、技能、提示词或主题。</span>
+						</div>
+						<div class="action-form">
+							<div class="form-grid">
+								<label>
+									<span>资源类型</span>
+									<div class="custom-select-wrapper">
+										<select id="resourceTypeSelect">
+											<option value="extensions">Extensions 扩展</option>
+											<option value="skills">Skills 技能路径</option>
+											<option value="prompts">Prompts 提示词路径</option>
+											<option value="themes">Themes 主题路径</option>
+										</select>
+									</div>
+								</label>
+								<label>
+									<span>本地目录绝对路径</span>
+									<input id="resourcePathInput" placeholder="例如: /Users/username/my-extensions" />
+								</label>
+							</div>
+							<div class="button-row-multiple">
+								<button id="resourcePathRemoveBtn" class="btn btn-secondary btn-danger-hover">
+									<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+									<span>移除该路径</span>
+								</button>
+								<button id="resourcePathAddBtn" class="btn btn-primary">
+									<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+									<span>添加该路径</span>
+								</button>
+							</div>
+						</div>
+					</section>
+				</div>
+				<aside id="resourcePreviewPane" class="resource-preview-pane hidden">
+					<div class="resource-preview-head">
+						<strong id="resourcePreviewTitle">资源预览</strong>
+						<button id="resourcePreviewCloseBtn" class="btn btn-secondary btn-sm" type="button">关闭</button>
+					</div>
+					<div id="resourcePreviewPath" class="resource-preview-path truncate-path"></div>
+					<pre id="resourcePreviewContent" class="resource-preview-content"></pre>
+				</aside>
+
+				<div class="modal-actions close-actions">
+					<button id="resourcesCloseBtn" class="btn btn-secondary">关闭资源管理器</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- 工作目录选择器 -->
+		<div id="cwdModalBackdrop" class="modal-backdrop hidden">
+			<div class="modal cwd-modal modal-animation">
+				<div class="modal-header">
+					<svg class="modal-header-icon text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+					<h3>选择工作目录</h3>
+				</div>
+				<div class="modal-content">
+					<div class="cwd-toolbar">
+						<button id="cwdHomeBtn" class="btn btn-secondary mini-action" type="button">个人目录</button>
+						<button id="cwdCurrentBtn" class="btn btn-secondary mini-action" type="button">当前目录</button>
+						<button id="cwdParentBtn" class="btn btn-secondary mini-action" type="button">上一级</button>
+					</div>
+					<div id="cwdRecentList" class="cwd-recent-list"></div>
+					<div id="cwdPathLabel" class="cwd-path-label truncate-path">正在加载...</div>
+					<div id="cwdList" class="cwd-list"></div>
+					<div id="cwdStatus" class="modal-status-msg small"></div>
+				</div>
+				<div class="modal-actions">
+					<button id="cwdCancelBtn" class="btn btn-secondary" type="button">取消</button>
+					<button id="cwdSelectBtn" class="btn btn-primary" type="button">使用此目录</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- 历史会话列表 -->
+		<div id="sessionsModalBackdrop" class="modal-backdrop hidden">
+			<div class="modal sessions-modal modal-animation">
+				<div class="modal-header">
+					<svg class="modal-header-icon text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"></path></svg>
+					<h3>历史会话</h3>
+				</div>
+				<div class="modal-content">
+					<div class="session-browser-toolbar">
+						<select id="sessionCwdSelect" title="按工作目录筛选历史会话">
+							<option value="">当前工作目录</option>
+						</select>
+						<input id="sessionSearchInput" placeholder="按标题、首条消息、模型搜索..." autocomplete="off" />
+						<button id="sessionsRefreshBtn" class="btn btn-secondary mini-action" type="button">刷新</button>
+					</div>
+					<div id="sessionsStatus" class="modal-status-msg small"></div>
+					<div id="sessionsList" class="sessions-list"></div>
+				</div>
+				<div class="modal-actions">
+					<button id="sessionsCloseBtn" class="btn btn-secondary" type="button">关闭</button>
+				</div>
+			</div>
+		</div>
+
+		<script src="/app.js"></script>
+	</body>
+</html>

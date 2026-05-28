@@ -1,5 +1,5 @@
 import { type AgentMessage, uuidv7 } from "@earendil-works/pi-agent-core";
-import type { ImageContent, Message, TextContent } from "@earendil-works/pi-ai";
+import type { AssistantMessage, ImageContent, Message, TextContent } from "@earendil-works/pi-ai";
 import { randomUUID } from "crypto";
 import {
 	appendFileSync,
@@ -172,6 +172,8 @@ export interface SessionInfo {
 	cwd: string;
 	/** User-defined display name from session_info entries. */
 	name?: string;
+	/** Last model recorded by a model change or assistant response. */
+	lastModel?: { provider: string; modelId: string };
 	/** Path to the parent session (if this session was forked). */
 	parentSessionPath?: string;
 	created: Date;
@@ -501,6 +503,10 @@ function isMessageWithContent(message: AgentMessage): message is Message {
 	return typeof (message as Message).role === "string" && "content" in message;
 }
 
+function isAssistantMessage(message: AgentMessage): message is AssistantMessage {
+	return isMessageWithContent(message) && message.role === "assistant";
+}
+
 function extractTextContent(message: Message): string {
 	const content = message.content;
 	if (typeof content === "string") {
@@ -510,6 +516,13 @@ function extractTextContent(message: Message): string {
 		.filter((block): block is TextContent => block.type === "text")
 		.map((block) => block.text)
 		.join(" ");
+}
+
+function modelFromAgentMessage(message: AgentMessage): { provider: string; modelId: string } | undefined {
+	if (!isAssistantMessage(message)) {
+		return undefined;
+	}
+	return { provider: message.provider, modelId: message.model };
 }
 
 function getLastActivityTime(entries: FileEntry[]): number | undefined {
@@ -574,6 +587,7 @@ async function buildSessionInfo(filePath: string): Promise<SessionInfo | null> {
 		let firstMessage = "";
 		const allMessages: string[] = [];
 		let name: string | undefined;
+		let lastModel: { provider: string; modelId: string } | undefined;
 
 		for (const entry of entries) {
 			// Extract session name (use latest, including explicit clears)
@@ -582,10 +596,15 @@ async function buildSessionInfo(filePath: string): Promise<SessionInfo | null> {
 				name = infoEntry.name?.trim() || undefined;
 			}
 
+			if (entry.type === "model_change") {
+				lastModel = { provider: entry.provider, modelId: entry.modelId };
+			}
+
 			if (entry.type !== "message") continue;
 			messageCount++;
 
 			const message = (entry as SessionMessageEntry).message;
+			lastModel = modelFromAgentMessage(message) ?? lastModel;
 			if (!isMessageWithContent(message)) continue;
 			if (message.role !== "user" && message.role !== "assistant") continue;
 
@@ -608,6 +627,7 @@ async function buildSessionInfo(filePath: string): Promise<SessionInfo | null> {
 			id: (header as SessionHeader).id,
 			cwd,
 			name,
+			lastModel,
 			parentSessionPath,
 			created: new Date((header as SessionHeader).timestamp),
 			modified,

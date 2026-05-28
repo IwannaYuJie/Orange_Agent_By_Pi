@@ -66,7 +66,10 @@ export type RpcCommand =
 	| { id?: string; type: "get_messages" }
 
 	// Commands (available for invocation via prompt)
-	| { id?: string; type: "get_commands" };
+	| { id?: string; type: "get_commands" }
+
+	// Resources
+	| { id?: string; type: "reload_resources" };
 
 // ============================================================================
 // RPC Slash Command (for get_commands response)
@@ -89,6 +92,7 @@ export interface RpcSlashCommand {
 // ============================================================================
 
 export interface RpcSessionState {
+	cwd: string;
 	model?: Model<any>;
 	thinkingLevel: ThinkingLevel;
 	isStreaming: boolean;
@@ -201,6 +205,9 @@ export type RpcResponse =
 			success: true;
 			data: { commands: RpcSlashCommand[] };
 	  }
+
+	// Resources
+	| { id?: string; type: "response"; command: "reload_resources"; success: true }
 
 	// Error response (any command can fail)
 	| { id?: string; type: "response"; command: string; success: false; error: string };
