@@ -1,6 +1,8 @@
-# Pi Web
+# Orange Agent Web
 
-Pi Web is a local browser UI for a personal Pi fork. It keeps the terminal `pi` CLI intact and starts a localhost Web app backed by Pi RPC mode.
+Orange Agent Web is a local browser UI for this personal fork, **Orange Agent By Pi**. It is built on the open-source Pi agent harness, keeps the terminal `pi` CLI intact, and starts a localhost Web app backed by Pi RPC mode.
+
+This fork is not the official Pi project. It should be described as a personal Orange Agent fork powered by Pi, with upstream attribution kept in the root README and license notice.
 
 ## Start
 
