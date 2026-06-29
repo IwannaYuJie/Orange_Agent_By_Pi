@@ -590,7 +590,7 @@ function renderMessageContent(container, content, role) {
 				const privacyBadge = privacy
 					? `<span class="thinking-privacy" title="${escapeHtml(privacy.title)}">${escapeHtml(privacy.icon)}</span>`
 					: "";
-				summary.innerHTML = `<span class="thinking-icon">🧠</span> <span>思考过程</span>${privacyBadge}<span class="thinking-meta">${thinkingMetaText(tokenEstimate)}</span><span class="thinking-state-label">已收起</span>`;
+				summary.innerHTML = `<span class="thinking-icon"></span><span>思考过程</span>${privacyBadge}<span class="thinking-meta">${thinkingMetaText(tokenEstimate)}</span><span class="thinking-state-label">已收起</span>`;
 				const stateLabel = summary.querySelector(".thinking-state-label");
 				thinkingBlock.addEventListener("toggle", () => {
 					if (stateLabel) {
@@ -616,7 +616,7 @@ function renderMessageContent(container, content, role) {
 		} else if (block.type === "toolCall") {
 			const toolCallDiv = document.createElement("div");
 			toolCallDiv.className = "tool-call-block";
-			toolCallDiv.innerHTML = `<span class="tool-call-icon">🛠️</span> 调用: <code>${block.name}</code>`;
+			toolCallDiv.innerHTML = `<span class="tool-call-icon">▹</span>调用 <code>${block.name}</code>`;
 			container.appendChild(toolCallDiv);
 		}
 	}
@@ -719,9 +719,9 @@ function renderMessages(messages) {
 		const empty = document.createElement("div");
 		empty.className = "empty-state";
 		empty.innerHTML = `
-			<img class="empty-illustration" src="/assets/mikan-empty-state.png" alt="正在待命的橘猫助手" width="228" height="152" />
-			<div class="empty-title">随时可以开始</div>
-			<p>向 Pi 提问，让它分析文件、编写代码、运行本地命令，或者为您规划本地代码库的大型重构。</p>
+			<div class="empty-orb"><div class="empty-orb-core">π</div></div>
+			<div class="empty-title">指挥台已就绪</div>
+			<p>向 Orange Agent 提问，让它分析文件、编写代码、运行本地命令，或者为您规划本地代码库的大型重构。</p>
 		`;
 		chatLog.append(empty);
 		return;
@@ -819,7 +819,7 @@ function renderToolCard(name, id, args, result) {
 		head.className = "tool-head";
 		head.type = "button";
 		head.innerHTML = `
-			<span class="tool-title">🛠️ ${name}</span>
+			<span class="tool-title">${name}</span>
 			<div class="tool-badge-status">
 				<span class="tool-status-dot tool-status-running"></span>
 				<span class="tool-status-text">运行中</span>
@@ -841,7 +841,7 @@ function renderToolCard(name, id, args, result) {
 		badge.querySelector(".tool-status-text").textContent = statusTextZH;
 	}
 
-	card.querySelector(".tool-title").textContent = `🛠️ ${name}`;
+	card.querySelector(".tool-title").textContent = name;
 	scheduleToolBodyRender(id, card, renderToolBody(name, args, result));
 	chatLog.scrollTop = chatLog.scrollHeight;
 	return card;

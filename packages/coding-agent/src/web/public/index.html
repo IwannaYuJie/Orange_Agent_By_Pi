@@ -3,26 +3,33 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<title>Pi Web | AI 编程智能体工作区</title>
+		<title>Orange Agent · 智能体指挥台</title>
 
-		<!-- Google Fonts 字体配置 -->
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Orbitron:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
-		<link rel="stylesheet" href="/styles.css" />
+		<link rel="stylesheet" href="styles.css" />
 	</head>
 	<body>
+		<!-- 背景特效层：科技网格 + 漂移极光 + 扫描线 + 暗角 -->
+		<div class="bg-fx" aria-hidden="true">
+			<div class="fx-grid"></div>
+			<div class="fx-aurora"></div>
+			<div class="fx-aurora b"></div>
+			<div class="fx-scan"></div>
+			<div class="fx-vignette"></div>
+		</div>
+
 		<div class="app-shell" id="appShell">
 
 			<!-- 左侧边栏：会话管理、系统遥测与资源配置 -->
 			<aside class="sidebar left-panel" id="leftPanel">
 				<div class="brand">
-					<div class="brand-mark" title="Pi Web 橘猫">🐾</div>
+					<div class="brand-mark" title="Orange Agent"></div>
 					<div class="brand-info">
-						<h1>Pi Web 橘猫</h1>
+						<h1>Orange<small>Agent · powered by Pi</small></h1>
 					</div>
-					<!-- 紧凑遥测：消息数 / 待处理 直接挂在品牌行上，省一整块空间 -->
 					<div class="brand-telemetry" title="消息数 / 待处理">
 						<span class="telemetry-pill" title="消息数"><span class="telemetry-icon">✉</span><strong id="messageMetric">0</strong></span>
 						<span class="telemetry-pill" title="待处理队列"><span class="telemetry-icon">⏳</span><strong id="queueMetric">0</strong></span>
@@ -118,7 +125,7 @@
 						<div id="observerWarning" class="observer-warning hidden" title="此窗口共享同一个 RPC 会话，操作会影响 owner 窗口">observer</div>
 					</div>
 
-					<!-- Model Selectors (放置于顶部栏，高度集成，界面更加清爽) -->
+					<!-- 模型选择器集成在顶部栏 -->
 					<div class="topbar-model-controls">
 						<input id="modelSearchInput" class="model-search-input" placeholder="搜索模型..." autocomplete="off" />
 						<div class="custom-select-wrapper model-select-wrapper">
@@ -147,7 +154,6 @@
 								<span>计划</span>
 							</button>
 						</div>
-						<!-- 终端抽屉切换按钮 -->
 						<button id="toggleRightBtn" class="btn btn-secondary btn-icon-only toggle-sidebar-btn" title="显示/隐藏终端抽屉">
 							<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="15" x2="21" y2="15"></line></svg>
 						</button>
@@ -157,9 +163,9 @@
 				<!-- 滚动聊天区 -->
 				<section id="chatLog" class="chat-log" aria-live="polite">
 					<div class="empty-state">
-						<img class="empty-illustration" src="/assets/mikan-empty-state.png" alt="正在待命的橘猫助手" width="160" height="106" />
-						<div class="empty-title">随时可以开始</div>
-						<p>提问、写代码、跑命令，或者让 Pi 帮你规划本地代码库的大型重构。</p>
+						<div class="empty-orb"><div class="empty-orb-core">π</div></div>
+						<div class="empty-title">指挥台已就绪</div>
+						<p>提问、写代码、跑命令，或者让 Orange Agent 帮你规划本地代码库的大型重构。</p>
 						<div class="quick-prompts" role="group" aria-label="快捷提示">
 							<button class="quick-prompt" type="button" data-prompt="请分析当前项目的目录结构，告诉我这是个什么类型的项目，主要模块有哪些。">
 								<span class="qp-icon">📁</span><span>分析项目结构</span>
@@ -182,12 +188,12 @@
 					<span>↓ 智能体正在输入...</span>
 				</div>
 
-				<!-- 对话输入区 (Codex-style 内嵌式输入面板) -->
+				<!-- 对话输入区 -->
 				<footer class="composer">
 					<div id="slashCommandMenu" class="slash-menu hidden" role="listbox"></div>
 					<div id="attachmentPreview" class="attachment-preview"></div>
 					<div class="textarea-wrapper">
-						<textarea id="promptInput" placeholder="向 Pi 发送指令...   Enter 发送 · Shift+Enter 换行" rows="2"></textarea>
+						<textarea id="promptInput" placeholder="向 Orange Agent 发送指令...   Enter 发送 · Shift+Enter 换行" rows="2"></textarea>
 						<div class="composer-actions">
 							<label class="file-button btn btn-secondary btn-icon-only" title="附加文件或图片">
 								<input id="attachmentInput" type="file" multiple accept="image/png,image/jpeg,image/gif,image/webp,text/*,.txt,.md,.json,.yaml,.yml,.toml,.xml,.csv,.tsv,.pdf,application/pdf" />
@@ -208,7 +214,7 @@
 				</footer>
 			</main>
 
-			<!-- 底部抽屉：复古游戏终端与系统日志 (原本是 rightPanel 侧边栏，现合并平铺至底部以扩展聊天宽度) -->
+			<!-- 底部抽屉：本地终端与系统事件流 -->
 			<aside class="sidebar right-panel collapsed" id="rightPanel">
 
 				<!-- 本地终端 -->
@@ -236,14 +242,15 @@
 							<button id="bashAbortBtn" class="terminal-abort-btn" type="button" disabled title="中断当前命令">SIGINT</button>
 						</div>
 
-						<!-- 隐藏的旧按钮，保持 DOM 节点 ID 兼容 -->
+						<!-- 隐藏的旧节点，保持 DOM 节点 ID 兼容 -->
 						<div class="terminal-action-row hidden">
 							<button id="bashBtn">运行</button>
+							<pre id="bashOutput"></pre>
 						</div>
 					</div>
 				</div>
 
-				<!-- WebSocket 日志 -->
+				<!-- 系统事件流 -->
 				<div class="panel-section events-section">
 					<div class="section-title-row">
 						<div class="section-title">系统事件流</div>
@@ -540,7 +547,7 @@
 					<section class="resource-panel" data-panel="paths" role="tabpanel" hidden>
 						<div class="panel-hint">
 							<svg class="hint-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-							<span>添加额外的目录，让 Pi 在这些位置查找扩展、技能、提示词或主题。</span>
+							<span>添加额外的目录，让 Orange Agent 在这些位置查找扩展、技能、提示词或主题。</span>
 						</div>
 						<div class="action-form">
 							<div class="form-grid">
@@ -637,6 +644,6 @@
 			</div>
 		</div>
 
-		<script src="/app.js"></script>
+		<script src="app.js"></script>
 	</body>
 </html>
